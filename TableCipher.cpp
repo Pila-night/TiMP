@@ -3,13 +3,14 @@
 #include <iostream>
 #include <locale>
 #include <string>
+#include <vector>
 using namespace std;
 TableCipher::TableCipher(int key)
     : key(key)
 {
 }
 
-std::wstring TableCipher::transformAndFilter(const std::wstring& text)
+/*std::wstring TableCipher::transformAndFilter(const std::wstring& text)
 {
     // Преобразование регистра
 
@@ -28,31 +29,29 @@ std::wstring TableCipher::transformAndFilter(const std::wstring& text)
     }
 
     return filtered;
-}
+}*/
 
 std::wstring TableCipher::encrypt(const std::wstring& text)
 {
-    std::wstring filtered = transformAndFilter(text);
-
     // Вычисляем количество столбцов
     int rows;
-    if(filtered.length() % key != 0) {
-        rows = filtered.length() / key + 1;
+    if(text.length() % key != 0) {
+        rows = text.length() / key + 1;
     } else {
-        rows = filtered.length() / key;
+        rows = text.length() / key;
     }
 
     wchar_t table[rows][key];
 
-    // Заполнение массива символами из строки filtered
-    int index = 0;                     // индекс для перебора символов в строке filtered
+    // Заполнение массива символами из строки text
+    int index = 0;                     // индекс для перебора символов в строке text
     for(int i = 0; i < rows; i++) {    // проход по строкам таблицы
         for(int j = 0; j < key; j++) { // проход по столбцам
-            if(index < filtered.length()) {
-                table[i][j] = filtered[index];
+            if(index < text.length()) {
+                table[i][j] = text[index];
                 index++;
             } else {
-                table[i][j] = L'\0'; // используем нулевой символ для обозначения пустой ячейки
+                table[i][j] = L' '; 
             }
         }
     }
@@ -71,40 +70,29 @@ std::wstring TableCipher::encrypt(const std::wstring& text)
 
 std::wstring TableCipher::decrypt(const std::wstring& encrypted_text)
 {
-    // Вычисляем количество строк
-    int rows;
-    if(encrypted_text.length() % key != 0) {
-        rows = encrypted_text.length() / key + 1;
-    } else {
-        rows = encrypted_text.length() / key;
-    }
+    // Вычисляем высоту таблицы
+    int rows = (encrypted_text.length() + key - 1) / key; // округление вверх
 
+    // Создание двумерного массива символов размером rows на key
     wchar_t table[rows][key];
 
     int index = 0;
-
-    // Заполнение массива для расшифровки
-    for(int i = 0; i < key; i++) {
-        for(int j = 0; j < rows; j++) {
+    for(int i = key - 1; i >= 0; i--) {
+        for(int j = 0; j < rows; ++j) {
             if(index < encrypted_text.length()) {
                 table[j][i] = encrypted_text[index];
                 index++;
             } else {
-                table[j][i] = L'\0'; // используем нулевой символ для обозначения пустой ячейки
+                table[i][j] = L' ';
             }
         }
     }
-
-    std::wstring decrypted_text;
-
-    // Чтение из таблицы в правильном порядке для расшифровки
+    wstring decrypted_text;
+    index = 0;
     for(int i = 0; i < rows; i++) {
-        for(int j = key - 1; j >= 0; j--) { // Изменяем порядок чтения на "сверху вниз, справа налево"
-            if(table[i][j] != L'\0') {
-                decrypted_text += table[i][j];
-            }
+        for(int j = 0; j < key; j++) {
+            decrypted_text += table[i][j];
         }
     }
-
     return decrypted_text;
 }
