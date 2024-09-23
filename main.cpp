@@ -1,5 +1,7 @@
 #include <TableCipher.h>
+
 #include <iostream>
+#include <limits>
 #include <locale>
 #include <string>
 
@@ -12,42 +14,76 @@ int main(int argc, char** argv)
     wstring text;
     unsigned op;
 
-    wcout << L"Введите ключ: ";
-    wcin >> key;
-    wcin.ignore(); // Игнорируем символ новой строки после ввода ключа
+    // Ввод ключа
+    while(true) { // Цикл для корректного ввода ключа
+        wcout << L"Введите ключ: ";
+        if(wcin >> key) {
+            if(key == 0) {
+                wcout << L"Ключ не должен быть равен 0. Попробуйте снова.\n";
+                wcin.clear(); //сбрасываем состояние ошибки
+                wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); // очищаем буфер ввода
+                continue;   
+            }
+            wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); 
+            break;
+        } else {
+            wcout << L"Неверный ввод ключа. Ключ - число больше нуля.\n";
+            wcin.clear();                                          
+            wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); 
+        }
+    }
 
-    wcout << L"Ключ загружен\n";
     TableCipher cipher(key);
+    wcout << L"Ключ загружен\n";
 
     do {
         wcout << L"Шифр готов. Выберите операцию (0-выход, 1-зашифровать, 2-расшифровать, 3-сменить ключ): ";
-        wcin >> op;
-        wcin.ignore(); // Игнорируем символ новой строки после ввода операции
+        if(wcin >> op) {
+            wcin.ignore(numeric_limits<streamsize>::max(), L'\n');
 
-        if (op > 3) {
-            wcout << L"Неправильная операция\n";
-        } else if (op == 3) {
-            // Смена ключа
-            wcout << L"Введите новый ключ: ";
-            wcin >> key;
-            wcin.ignore(); // Игнорируем символ новой строки после ввода нового ключа
-            cipher = TableCipher(key); // Обновляем шифратор с новым ключом
-            wcout << L"Ключ успешно изменён\n";
-        } else if (op > 0) {
-            wcout << L"Введите текст: ";
-            getline(wcin, text); // Используем getline для считывания всей строки
+            if(op > 3) {
+                wcout << L"Неправильная операция\n";
+            } else if(op == 3) {
+                // Смена ключа
+                while(true) { //цикл для корректного ввода ключа
+                    wcout << L"Введите новый ключ: ";
+                    if(wcin >> key) {
+                        if(key == 0) {
+                            wcout << L"Ключ не должен быть равен 0. Попробуйте снова.\n";
+                            wcin.clear(); 
+                            wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); 
+                            continue;                                              
+                        }
+                        wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); 
+                        cipher = TableCipher(key); 
+                        wcout << L"Ключ успешно изменён\n";
+                        break;
+                    } else {
+                        wcout << L"Неверный ввод ключа. Попробуйте снова.\n";
+                        wcin.clear();
+                        wcin.ignore(numeric_limits<streamsize>::max(), L'\n');
+                    }
+                }
+            } else if(op > 0) {
+                wcout << L"Введите текст: ";
+                getline(wcin, text);
 
-            if (op == 1) {
-                wcout << L"Зашифрованный текст: " << endl;
-                wcout << cipher.encrypt(text) << endl;
+                if(op == 1) {
+                    wcout << L"Зашифрованный текст: " << endl;
+                    wcout << cipher.encrypt(text) << endl;
+                } else {
+                    wcout << L"Расшифрованный текст: " << cipher.decrypt(text) << endl;
+                }
             } else {
-                wcout << L"Расшифрованный текст: " << cipher.decrypt(text) << endl;
+                wcout << L"Операция отменена: неправильный текст\n";
             }
         } else {
-            wcout << L"Операция отменена: неправильный текст\n";
+            wcout << L"Неверный ввод операции. Попробуйте снова.\n";
+            wcin.clear();                                         
+            wcin.ignore(numeric_limits<streamsize>::max(), L'\n'); 
         }
 
-    } while (op != 0);
+    } while(op != 0);
 
     return 0;
 }
