@@ -12,7 +12,7 @@ TableCipher::TableCipher(int key)
 
 std::wstring TableCipher::encrypt(const std::wstring& text)
 {
-    // Вычисляем количество столбцов
+    //вычисляем количество столбцов
     int rows;
     if(text.length() % key != 0) {
         rows = text.length() / key + 1;
@@ -30,14 +30,14 @@ std::wstring TableCipher::encrypt(const std::wstring& text)
                 table[i][j] = text[index];
                 index++;
             } else {
-                table[i][j] = L' '; 
+                table[i][j] = L' ';
             }
         }
     }
 
     std::wstring encrypted_text; // строка для хранения шифрованного текста
 
-    // Изменяем порядок чтения на "сверху вниз, справа налево"
+    // порядок чтения на "сверху вниз, справа налево"
     for(int i = key - 1; i >= 0; i--) {
         for(int j = 0; j < rows; j++) {
             encrypted_text += table[j][i];
@@ -49,10 +49,14 @@ std::wstring TableCipher::encrypt(const std::wstring& text)
 
 std::wstring TableCipher::decrypt(const std::wstring& encrypted_text)
 {
-    // Вычисляем высоту таблицы
-    int rows = (encrypted_text.length() + key - 1) / key; // округление вверх
+    //вычисляем количество столбцов
+    int rows;
+    if(encrypted_text.length() % key != 0) {
+        rows = encrypted_text.length() / key + 1;
+    } else {
+        rows = encrypted_text.length() / key;
+    }
 
-    // Создание двумерного массива символов размером rows на key
     wchar_t table[rows][key];
 
     int index = 0;
