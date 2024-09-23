@@ -3,33 +3,12 @@
 #include <iostream>
 #include <locale>
 #include <string>
-#include <vector>
 using namespace std;
+
 TableCipher::TableCipher(int key)
     : key(key)
 {
 }
-
-/*std::wstring TableCipher::transformAndFilter(const std::wstring& text)
-{
-    // Преобразование регистра
-
-    wstring preobrazovanie;
-    for(wchar_t c : text) {
-        preobrazovanie += towupper(c);
-    }
-
-    // Фильтрация
-
-    wstring filtered;
-    for(wchar_t c : preobrazovanie) {
-        if((c >= L'А' && c <= L'Я') || c == L'Ё') {
-            filtered += c;
-        }
-    }
-
-    return filtered;
-}*/
 
 std::wstring TableCipher::encrypt(const std::wstring& text)
 {
